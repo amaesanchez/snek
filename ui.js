@@ -1,7 +1,7 @@
 "use strict";
 
 const $GAME_BOARD = $("#gameboard");
-const TIMER_MS = 250;
+const TIMER_MS = 100;
 const KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 let intervalID;
 
