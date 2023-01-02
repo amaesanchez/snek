@@ -47,6 +47,7 @@ function displaySnake() {
     const snake_body = rows[coord.Y].children[coord.X];
     snake_body.setAttribute("style", "background-color: yellow");
   }
+  console.log('body', snake.body)
 }
 
 function updateDirection(evt) {
@@ -58,10 +59,28 @@ function updateDirection(evt) {
   }
 }
 
-function update_tile(coord) {
+function updateTile(coord) {
   const rows = document.querySelectorAll("tr");
   const cell = rows[coord.Y].children[coord.X];
   cell.setAttribute("style", "background-color:black");
+}
+
+function updateSnake() {
+  const last_body = snake.body[snake.body.length - 1];
+
+  if (snake.direction === "ArrowUp") {
+    const new_body = { X: last_body.X, Y: last_body.Y - 1 };
+    snake.body.unshift(new_body);
+  } else if (snake.direction === "ArrowDown") {
+    const new_body = { X: last_body.X, Y: last_body.Y + 1 };
+    snake.body.unshift(new_body);
+  } else if (snake.direction === "ArrowLeft") {
+    const new_body = { X: last_body.X - 1, Y: last_body.Y };
+    snake.body.unshift(new_body);
+  } else if (snake.direction === "ArrowRight") {
+    const new_body = { X: last_body.X + 1, Y: last_body.Y };
+    snake.body.unshift(new_body);
+  }
 }
 
 function moveSnake() {
@@ -70,9 +89,8 @@ function moveSnake() {
     alert('you lose')
     return
   }
-
   const last_body = snake.body[snake.body.length - 1];
-  update_tile(last_body)
+  updateTile(last_body)
 
   if (snake.direction === "ArrowUp") {
     const new_body = { X: last_body.X, Y: last_body.Y - 1 };
@@ -92,9 +110,14 @@ function moveSnake() {
     snake.body.pop();
   }
   console.log("movesnake", snake.body)
-  displaySnake()
 
-  // checkForFood()
+  if (checkForFood()) {
+    updateSnake()
+    game.placeFood();
+    displayFood();
+  }
+
+  displaySnake()
 }
 
 function checkForBounds() {
@@ -106,9 +129,23 @@ function checkForBounds() {
   return true;
 }
 
+function checkForFood() {
+  const head = snake.body[0]
+
+  if (head.X == game.food.X && head.Y == game.food.Y) {
+    console.log('true')
+    return true
+  }
+
+  return false
+}
+
 /** Start game */
 function startGame() {
   $GAME_BOARD.empty();
+  game = new Boardgame();
+  snake = new Snake();
+
 
   game.startGame();
 
@@ -116,11 +153,15 @@ function startGame() {
   displayFood();
   displaySnake();
 
-  intervalID = setInterval(moveSnake, TIMER_MS)
+  if (intervalID) {
+    clearTimeout(intervalID);
+  }
+
+  intervalID = setInterval(moveSnake, TIMER_MS);
 }
 
-const game = new Boardgame();
-const snake = new Snake();
+let game;
+let snake;
 $("#start").on("click", startGame);
 $(document).keydown(updateDirection);
 
